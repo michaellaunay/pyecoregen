@@ -28,5 +28,7 @@ def pythonic_names():
         return value
 
     ecore.ENamedElement.__getattribute__ = get_attribute
-    yield
-    ecore.ENamedElement.__getattribute__ = original_get_attribute
+    try:
+        yield
+    finally:
+        ecore.ENamedElement.__getattribute__ = original_get_attribute

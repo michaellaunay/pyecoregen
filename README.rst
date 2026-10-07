@@ -109,3 +109,29 @@ is then turning into a keyword argument ``my_param``.
     input metamodel. A metamodel dependency is typically a reference from the input
     metamodel to another ``.ecore`` file. Please note that this option introduces slower code
     generation as all metamodels must be scanned in order to determine dependencies.
+
+
+Python compatibility and testing
+-------------------------------
+
+Python 3.12 or newer is required. Run ``python -m pytest tests`` after installing
+``.[test]``. Build distributions with ``python -m build``; the wheel includes
+all generator templates. The CLI and EcoreGenerator keyword arguments remain
+available.
+
+Generation preserves model order and sorts otherwise unordered imports by package
+path and classifier name. Byte reproducibility requires the same model, templates,
+formatter versions and options. Model names used as Python identifiers must be
+valid identifiers; keywords receive the historical trailing underscore. Invalid
+names raise ValueError before generation writes files. Output directories are
+caller-controlled and may contain spaces or Unicode.
+
+The name adaptation context restores global state after errors, but generation
+still temporarily patches ENamedElement globally and is not thread-safe. Generation
+is not a sandbox for untrusted models, templates or user modules, and does not
+provide a transaction across multiple output files. The frozen legacy corpus in
+tests/legacy is tested alongside new output and must not be regenerated in tests.
+
+The migration harness qualifies local PyEcore and pymultigen forks, including
+isolated sdist/wheel builds and import provenance checks; ordinary pip dependency
+resolution alone does not establish this provenance.

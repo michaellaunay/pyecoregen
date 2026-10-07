@@ -1,1 +1,3 @@
-include README.rst CHANGELOG.md LICENSE pyecoregen/templates/*
+include README.rst CHANGELOG.md LICENSE pygen.rst
+recursive-include pyecoregen/templates *.tpl
+recursive-include tests *.py *.ecore *.json *.rst

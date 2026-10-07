@@ -1,5 +1,5 @@
 {% import 'module_utilities.tpl' as modutil with context -%}
-"""Definition of meta model '{{ element.name }}'."""
+"""Definition of meta model {{ element.name | pyquotesingle }}."""
 from functools import partial
 import pyecore.ecore as Ecore
 from pyecore.ecore import *
@@ -10,9 +10,9 @@ from pyecore.ecore import *
     import {{ user_module }} as _user_module
 {% endif %}
 
-name = '{{ element.name }}'
-nsURI = '{{ element.nsURI | default(boolean=True) }}'
-nsPrefix = '{{ element.nsPrefix | default(boolean=True) }}'
+name = {{ element.name | pyquotesingle }}
+nsURI = {{ element.nsURI | default('', boolean=True) | pyquotesingle }}
+nsPrefix = {{ element.nsPrefix | default('', boolean=True) | pyquotesingle }}
 
 eClass = EPackage(name=name, nsURI=nsURI, nsPrefix=nsPrefix)
 

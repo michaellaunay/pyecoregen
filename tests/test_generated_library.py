@@ -9,8 +9,10 @@ from pyecore.utils import DynamicEPackage
 from pyecoregen.ecore import EcoreGenerator
 
 
-@pytest.fixture(scope='module')
-def generated_library(pygen_output_dir):
+@pytest.fixture(scope='module', params=['current', 'legacy'])
+def generated_library(pygen_output_dir, request):
+    if request.param == 'legacy':
+        return importlib.import_module('legacy.legacy_library')
     rset = ResourceSet()
     resource = rset.get_resource(URI('input/library.ecore'))
     library_model = resource.contents[0]
@@ -98,7 +100,7 @@ def test_library_econtents_generated(generated_library):
 
 def test_instance_eisset_generated(generated_library):
     smith = generated_library.Writer()
-    assert smith._isset == set()
+    assert len(smith._isset) == 0
     smith.name = 'SmithIsMyName'
     assert generated_library.Writer.name in smith._isset
     assert smith.eIsSet(generated_library.Writer.name)

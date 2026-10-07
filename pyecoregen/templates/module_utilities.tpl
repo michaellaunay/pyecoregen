@@ -5,7 +5,7 @@
 {#- -------------------------------------------------------------------------------------------- -#}
 
 {%- macro generate_edatatype(e) %}
-{{ e.name }} = EDataType('{{ e.name }}', instanceClassName='{{ e.instanceClassName }}')
+{{ e.name }} = EDataType('{{ e.name }}', instanceClassName={{ e.instanceClassName | pyquotesingle }})
 {% endmacro %}
 
 {#- -------------------------------------------------------------------------------------------- -#}

@@ -70,7 +70,8 @@ class EcorePackageInitTask(EcoreTask):
         for classifier in imported:
             imported_dict.setdefault(classifier.ePackage, set()).add(classifier)
 
-        return imported_dict
+        return {package: sorted(imported_dict[package], key=lambda c: c.name)
+                for package in sorted(imported_dict, key=EcoreGenerator.filter_pyfqn)}
 
     def create_template_context(self, element, **kwargs):
         return super().create_template_context(
@@ -101,7 +102,8 @@ class EcorePackageModuleTask(EcoreTask):
         for classifier in imported:
             imported_dict.setdefault(classifier.ePackage, set()).add(classifier)
 
-        return imported_dict
+        return {package: sorted(imported_dict[package], key=lambda c: c.name)
+                for package in sorted(imported_dict, key=EcoreGenerator.filter_pyfqn)}
 
     @staticmethod
     def classes(p: ecore.EPackage):
@@ -191,7 +193,7 @@ class EcoreGenerator(multigen.jinja.JinjaGenerator):
     def filter_docstringline(value: ecore.EModelElement) -> str:
         annotation = value.getEAnnotation('http://www.eclipse.org/emf/2002/GenModel')
         doc = annotation.details.get('documentation', '') if annotation else None
-        return '"""{}"""'.format(doc) if doc else ''
+        return repr(doc) if doc else ''
 
     @staticmethod
     def filter_supertypes(value: ecore.EClass):
@@ -200,7 +202,7 @@ class EcoreGenerator(multigen.jinja.JinjaGenerator):
 
     @staticmethod
     def filter_pyquotesingle(value: str):
-        return '\'{}\''.format(value) if value is not None else ''
+        return repr(value) if value is not None else ''
 
     @staticmethod
     def filter_derived_name(value: ecore.EStructuralFeature):
@@ -343,6 +345,11 @@ class EcoreGenerator(multigen.jinja.JinjaGenerator):
             exclude: List of referenced resources for which code was already generated
                 (to prevent regeneration).
         """
+        # Validate before any task creates directories. Output root remains caller-controlled.
+        for element in itertools.chain([model], model.eAllContents()):
+            if isinstance(element, ecore.ENamedElement) and (
+                    not isinstance(element.name, str) or not element.name.isidentifier()):
+                raise ValueError(f'Expected a Python identifier, got {element.name!r}')
         with pythonic_names():
             super().generate(model, outfolder)
 
@@ -355,5 +362,5 @@ class EcoreGenerator(multigen.jinja.JinjaGenerator):
                 exclude.add(resource)
                 rset = resource.resource_set
                 direct_resources = {r for r in rset.resources.values() if r not in exclude}
-                for resource in direct_resources:
+                for resource in sorted(direct_resources, key=lambda r: r.uri.plain):
                     self.generate(resource.contents[0], outfolder, exclude=exclude)

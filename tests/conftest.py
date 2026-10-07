@@ -2,6 +2,10 @@
 import os
 import shutil
 import sys
+from pathlib import Path
+
+# Only test support modules; runtime imports must retain qualification provenance.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import pytest
 
@@ -24,3 +28,20 @@ def pygen_output_dir(cwd_module_dir):
     yield path
     sys.path.remove(path)
     shutil.rmtree(path, ignore_errors=False)
+
+
+# Capture qualified runtime roots before tests, and reject support fixtures that
+# accidentally redirect imports back into a different checkout.
+def pytest_sessionstart(session):
+    import pyecore, multigen, pyecoregen
+    session._runtime_roots = {
+        m.__name__: Path(m.__file__).resolve().parent
+        for m in (pyecore, multigen, pyecoregen)
+    }
+
+
+def pytest_sessionfinish(session, exitstatus):
+    for name, module in list(sys.modules.items()):
+        root = session._runtime_roots.get(name.split('.')[0])
+        if root is not None and getattr(module, '__file__', None):
+            assert Path(module.__file__).resolve().is_relative_to(root), (name, module.__file__)

@@ -19,7 +19,7 @@ from .{{ element.name }} import name, nsURI, nsPrefix, eClass
         {%- for sub in element | all_contents(ecore.EPackage) -%}
             {% set types_in_sub = types | selectattr('ePackage', 'sameas', sub) | set %}
             {%- if types_in_sub %}
-from {{ sub | pyfqn(relative_to=1) }} import {{ types_in_sub | map(attribute='name') | join(', ') }}
+from {{ sub | pyfqn(relative_to=1) }} import {{ types_in_sub | sort(attribute='name') | map(attribute='name') | join(', ') }}
             {%- endif -%}
         {% endfor -%}
     {% endwith -%}
