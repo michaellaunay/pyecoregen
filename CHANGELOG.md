@@ -1,3 +1,13 @@
+## Unreleased — Python 3.14 migration (release decision pending)
+
+- CPython >=3.12 metadata; qualified 3.12/3.13/3.14 standard with GIL on Linux x86_64 only.
+- Build backend setuptools >=83.0.0 and test extra pytest >=9.0.3. Project/module names, nsURI, licenses and author credits are retained.
+- Removed setuptools.command.test and legacy test hooks; retained CLI and EcoreGenerator API.
+- Deterministic imports, package/output ordering and formatting; escaped strings, Unicode, keywords, defaults, subpackages and package dependencies are qualified.
+- Templates ship in sdists/wheels; frozen old generated-code corpus remains separate from current candidate generation.
+
+Keep old generated code until a reviewed comparison is available. Generate into a separate directory with pyecoregen -e model.ecore -o candidate; compile, import, instantiate and round-trip before replacing application sources.
+
 # Changelog
 All notable changes to this project will be documented in this file.
 
